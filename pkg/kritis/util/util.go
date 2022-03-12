@@ -88,7 +88,7 @@ func CreateAttestation(image string, pgpSigningKey *secrets.PGPSigningSecret) (*
 		return nil, err
 	}
 
-	payload, err := attestation.AtomicContainerPayload(image)
+	payload, err := attestation.AtomicContainerPayload(image, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -26,8 +26,8 @@ import (
 //
 // This payload is in the Red Hat's Atomic Host format:
 // https://github.com/aweiteka/image/blob/e5a20d98fe698732df2b142846d007b45873627f/docs/signature.md
-func AtomicContainerPayload(imageUri string) ([]byte, error) {
-	acs, err := container.NewAtomicContainerSig(imageUri, nil)
+func AtomicContainerPayload(imageUri string, attributes map[string]string) ([]byte, error) {
+	acs, err := container.NewAtomicContainerSig(imageUri, attributes)
 	if err != nil {
 		return nil, err
 	}

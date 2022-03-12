@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang/glog"
@@ -64,6 +65,9 @@ var (
 	// helper global variables
 	modeFlags   *flag.FlagSet
 	modeExample string
+
+	// additional payload attributes
+	attributes string
 )
 
 func init() {
@@ -93,6 +97,7 @@ func addSignFlags(fs *flag.FlagSet) {
 	fs.StringVar(&pgpPassphrase, "pgp_passphrase", "", "passphrase for pgp private key, if any")
 	fs.StringVar(&pkixPriKeyPath, "pkix_private_key", "", "pkix private signing key path, e.g., /dev/shm/key.pem")
 	fs.StringVar(&pkixAlg, "pkix_alg", "", "pkix signature algorithm, e.g., ecdsa-p256-sha256")
+	fs.StringVar(&attributes, "attributes", "", "additional payload attributes, e.g. fortify:passed,aqua:failed")
 }
 
 // parseSignerMode creates mode-specific flagset and analyze actions (check, sign) for given mode
@@ -274,8 +279,22 @@ func main() {
 
 		// Create signer
 		r := signer.New(client, cSigner, noteName, attestationProject, overwrite)
+
+		// build addtional payload attributes
+		var attr map[string]string
+		if attributes != "" {
+			attr = map[string]string{}
+			a := strings.Split(attributes, ",")
+			for _, attribute := range a {
+				aKeyValue := strings.Split(attribute, ":")
+				if len(aKeyValue) != 2 {
+					glog.Fatalf("Invalid payload attribute string. For example -attributes=fortify:passed,aqua:failed ")
+				}
+				attr[aKeyValue[0]] = aKeyValue[1]
+			}
+		}
 		// Sign image
-		err := r.SignImage(image)
+		err := r.SignImage(image, attr)
 		if err != nil {
 			glog.Fatalf("Signing image failed: %v", err)
 		}

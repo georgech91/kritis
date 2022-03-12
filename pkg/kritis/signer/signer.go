@@ -81,7 +81,7 @@ var (
 
 // SignImage signs an image without doing any policy check.
 // Returns an error if creating an attestation fails.
-func (s Signer) SignImage(image string) error {
+func (s Signer) SignImage(image string, attributes map[string]string) error {
 	existed, err := s.isAttestationAlreadyExist(image)
 	if err != nil {
 		return fmt.Errorf("checking existing attestation status failed: %v", err)
@@ -103,7 +103,7 @@ func (s Signer) SignImage(image string) error {
 
 	glog.Infof("Creating attestation for image %q.", image)
 	// Create attestation
-	att, err := s.createAttestation(image)
+	att, err := s.createAttestation(image, attributes)
 	if err != nil {
 		return fmt.Errorf("creatiing attestation failed: %v", err)
 	}
@@ -119,8 +119,8 @@ func (s Signer) SignImage(image string) error {
 }
 
 // Creating an atestation.
-func (s Signer) createAttestation(image string) (*attestlib.Attestation, error) {
-	payload, err := attestation.AtomicContainerPayload(image)
+func (s Signer) createAttestation(image string, attributes map[string]string) (*attestlib.Attestation, error) {
+	payload, err := attestation.AtomicContainerPayload(image, attributes)
 	if err != nil {
 		return nil, err
 	}
